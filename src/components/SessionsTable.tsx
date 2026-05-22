@@ -14,6 +14,14 @@ const SessionsTable = () => {
   const [currentPage, setCurrentPage] = React.useState(1);
   const recordsPerPage = 10;
 
+  const getDuration = (s: any) => {
+    if (typeof s.duration_seconds === 'number') return s.duration_seconds;
+    if (s.started_at && s.ended_at) {
+      return Math.max(0, Math.round((new Date(s.ended_at).getTime() - new Date(s.started_at).getTime()) / 1000));
+    }
+    return 0;
+  };
+
   const sessions = React.useMemo(() => {
     return [...(data?.sessions ?? [])].sort(
       (a, b) => new Date(b.started_at).getTime() - new Date(a.started_at).getTime()
@@ -128,7 +136,7 @@ const SessionsTable = () => {
                     {session.visitor_id.substring(0, 10)}…
                   </td>
                   <td className="py-4 px-4 text-sm text-slate-600">
-                    {session.duration_seconds}s
+                    {getDuration(session)}s
                   </td>
                   <td className="py-4 px-4">
                     <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${levelStyle[session.scoring.final_level] ?? 'bg-slate-100 text-slate-500'}`}>

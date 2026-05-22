@@ -67,8 +67,16 @@ const Dashboard = () => {
   const clickRate = ((clickSessions / currTotal) * 100).toFixed(1);
   const prevClickRate = (prevClickSess / prevTotal) * 100;
 
-  const avgDurationVal = curr.reduce((a, s) => a + s.duration_seconds, 0) / currTotal;
-  const prevAvgDuration = prev.reduce((a, s) => a + s.duration_seconds, 0) / prevTotal;
+  const getDuration = (s: any) => {
+    if (typeof s.duration_seconds === 'number') return s.duration_seconds;
+    if (s.started_at && s.ended_at) {
+      return Math.max(0, (new Date(s.ended_at).getTime() - new Date(s.started_at).getTime()) / 1000);
+    }
+    return 0;
+  };
+
+  const avgDurationVal = curr.reduce((a, s) => a + getDuration(s), 0) / currTotal;
+  const prevAvgDuration = prev.reduce((a, s) => a + getDuration(s), 0) / prevTotal;
   const avgDuration = avgDurationVal.toFixed(1);
 
   const fmt = (n: number) => n >= 1000 ? `${(n / 1000).toFixed(1)}K` : `${n}`;

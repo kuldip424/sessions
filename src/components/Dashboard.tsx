@@ -98,7 +98,7 @@ const Dashboard = () => {
     <div className="min-h-screen bg-gray-50 flex">
       <main className="flex-1 min-h-screen flex flex-col transition-all duration-300">
         <Navbar />
-
+        
         <motion.div
           variants={container}
           initial="hidden"

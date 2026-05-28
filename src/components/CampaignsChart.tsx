@@ -113,6 +113,13 @@ const CustomLegend = ({ payload }: any) => {
 const CampaignsChart = () => {
   const { data, loading } = useSessions();
 
+  const normalizeSource = (source?: string) => {
+    const normalized = source?.toString().trim().toLowerCase();
+    if (!normalized || normalized === 'direct') return 'direct';
+    if (normalized === 'referral') return 'referral';
+    return normalized;
+  };
+
   const chartData = React.useMemo(() => {
     if (!data?.sessions) return [];
 
@@ -125,7 +132,7 @@ const CampaignsChart = () => {
     };
 
     data.sessions.forEach((s) => {
-      const source = s.referrer?.source || 'direct';
+      const source = normalizeSource(s.referrer?.source);
       if (!groups[source]) {
         groups[source] = { page_views: 0, cart_adds: 0, exit_intents: 0, product_views: 0, count: 0 };
       }
@@ -136,10 +143,22 @@ const CampaignsChart = () => {
       groups[source].count += 1;
     });
 
-    return Object.entries(groups)
+    let result = Object.entries(groups)
       .map(([name, vals]) => ({ name, ...vals }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 6);
+
+    if (groups.referral?.count > 0 && !result.some((entry) => entry.name === 'referral')) {
+      const referralEntry = { name: 'referral', ...groups.referral };
+      if (result.length >= 6) {
+        result[result.length - 1] = referralEntry;
+      } else {
+        result.push(referralEntry);
+      }
+      result = result.sort((a, b) => b.count - a.count);
+    }
+
+    return result;
   }, [data]);
 
   const topSource = chartData[0]?.name ?? '—';
@@ -150,12 +169,12 @@ const CampaignsChart = () => {
       initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-      className="relative overflow-hidden rounded-[2rem] border border-slate-200/60 bg-white p-8 shadow-sm group"
+      className="relative overflow-hidden rounded-[2rem] border border-slate-200/80 bg-gradient-to-br from-white via-slate-50/50 to-slate-50/20 p-8 shadow-lg hover:shadow-xl transition-shadow duration-300 group"
     >
       {/* Decorative blurs */}
-      <div className="absolute -right-16 -top-16 h-40 w-40 rounded-full bg-indigo-100/60 blur-3xl pointer-events-none group-hover:bg-indigo-200/60 transition-colors duration-700" />
-      <div className="absolute left-1/3 -top-10 h-28 w-28 rounded-full bg-rose-100/50 blur-3xl pointer-events-none group-hover:bg-rose-200/50 transition-colors duration-700" />
-      <div className="absolute -bottom-12 left-0 h-32 w-32 rounded-full bg-emerald-100/40 blur-3xl pointer-events-none" />
+      <div className="absolute -right-16 -top-16 h-40 w-40 rounded-full bg-indigo-100/70 blur-3xl pointer-events-none group-hover:bg-indigo-200/70 transition-colors duration-700" />
+      <div className="absolute left-1/3 -top-10 h-28 w-28 rounded-full bg-rose-100/60 blur-3xl pointer-events-none group-hover:bg-rose-200/60 transition-colors duration-700" />
+      <div className="absolute -bottom-12 left-0 h-32 w-32 rounded-full bg-emerald-100/50 blur-3xl pointer-events-none" />
 
       {/* Header */}
       <div className="relative mb-8">
@@ -200,7 +219,7 @@ const CampaignsChart = () => {
       </div>
 
       {/* Chart */}
-      <div className="h-[360px] w-full relative">
+      <div className="h-[420px] w-full relative bg-gradient-to-b from-slate-50/30 to-slate-100/10 rounded-xl p-4 border border-slate-100/40">
         {loading ? (
           <div className="h-full flex items-center justify-center">
             <div className="flex flex-col items-center gap-4">
@@ -218,8 +237,8 @@ const CampaignsChart = () => {
             <BarChart
               data={chartData}
               margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
-              barGap={6}
-              barCategoryGap="20%"
+              barGap={50}
+              barCategoryGap="45%"
             >
               <defs>
                 <linearGradient id="gradPV" x1="0" y1="0" x2="0" y2="1">
@@ -240,22 +259,23 @@ const CampaignsChart = () => {
                 </linearGradient>
               </defs>
               <CartesianGrid
-                strokeDasharray="3 3"
+                strokeDasharray="4 4"
                 vertical={false}
-                stroke="#f1f5f9"
+                stroke="#e2e8f0"
+                strokeOpacity={0.5}
               />
               <XAxis
                 dataKey="name"
                 axisLine={false}
                 tickLine={false}
-                tick={{ fill: '#94a3b8', fontSize: 12, fontWeight: 600 }}
-                dy={10}
+                tick={{ fill: '#64748b', fontSize: 13, fontWeight: 600 }}
+                dy={12}
               />
               <YAxis
                 axisLine={false}
                 tickLine={false}
-                tick={{ fill: '#94a3b8', fontSize: 12, fontWeight: 500 }}
-                width={45}
+                tick={{ fill: '#64748b', fontSize: 12, fontWeight: 500 }}
+                width={50}
               />
               <Tooltip
                 content={<CustomTooltip />}
@@ -271,7 +291,7 @@ const CampaignsChart = () => {
                 name="page_views"
                 fill="url(#gradPV)"
                 radius={[6, 6, 0, 0]}
-                barSize={22}
+                barSize={20}
                 animationDuration={1200}
                 animationEasing="ease-out"
               />
@@ -280,7 +300,7 @@ const CampaignsChart = () => {
                 name="cart_adds"
                 fill="url(#gradCA)"
                 radius={[6, 6, 0, 0]}
-                barSize={22}
+                barSize={20}
                 animationDuration={1200}
                 animationEasing="ease-out"
               />
@@ -289,7 +309,7 @@ const CampaignsChart = () => {
                 name="product_views"
                 fill="url(#gradProd)"
                 radius={[6, 6, 0, 0]}
-                barSize={22}
+                barSize={20}
                 animationDuration={1200}
                 animationEasing="ease-out"
               />
@@ -298,7 +318,7 @@ const CampaignsChart = () => {
                 name="exit_intents"
                 fill="url(#gradExit)"
                 radius={[6, 6, 0, 0]}
-                barSize={22}
+                barSize={20}
                 animationDuration={1200}
                 animationEasing="ease-out"
               />

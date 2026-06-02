@@ -1,0 +1,15 @@
+name = "dashboard"
+type = "javascript"
+account_id = ""
+workers_dev = true
+
+[env.production]
+name = "dashboard-prod"
+
+[build]
+command = "npm run build"
+cwd = "./"
+watch_paths = ["src/**/*.ts", "src/**/*.tsx"]
+
+[build.upload]
+format = "service-worker"

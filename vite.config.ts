@@ -12,11 +12,19 @@ export default defineConfig({
     chunkSizeWarningLimit: 600,
     rolldownOptions: {
       output: {
-        manualChunks: {
-          'vendor-react': ['react', 'react-dom'],
-          'vendor-recharts': ['recharts'],
-          'vendor-framer': ['framer-motion'],
-          'vendor-lucide': ['lucide-react'],
+        manualChunks: (id: string) => {
+          if (id.includes('node_modules/react-dom') || id.includes('node_modules/react/')) {
+            return 'vendor-react';
+          }
+          if (id.includes('node_modules/recharts') || id.includes('node_modules/d3-')) {
+            return 'vendor-recharts';
+          }
+          if (id.includes('node_modules/framer-motion')) {
+            return 'vendor-framer';
+          }
+          if (id.includes('node_modules/lucide-react')) {
+            return 'vendor-lucide';
+          }
         },
       },
     },

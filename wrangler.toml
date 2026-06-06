@@ -1,15 +1,5 @@
 name = "dashboard"
-type = "javascript"
-account_id = ""
-workers_dev = true
+compatibility_date = "2026-06-06"
 
-[env.production]
-name = "dashboard-prod"
-
-[build]
-command = "npm run build"
-cwd = "./"
-watch_paths = ["src/**/*.ts", "src/**/*.tsx"]
-
-[build.upload]
-format = "service-worker"
+[assets]
+directory = "./dist"

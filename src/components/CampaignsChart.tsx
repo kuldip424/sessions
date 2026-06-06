@@ -237,7 +237,7 @@ const CampaignsChart = () => {
             <BarChart
               data={chartData}
               margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
-              barGap={50}
+              barGap={30}
               barCategoryGap="45%"
             >
               <defs>
